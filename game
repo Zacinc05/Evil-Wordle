@@ -13,7 +13,7 @@ def pick_word():
     return word
 
 def check(guess, word, alph):
-    result = [""] * 5
+    color_result = [""] * 5
     l_count = {}
 
     for l in word:
@@ -23,19 +23,26 @@ def check(guess, word, alph):
         alph[0] = alph[0].replace(guess[i], "")
         alph[1] = alph[1].replace(guess[i], "")
         if guess[i] == word[i]:
-            result[i] = GREEN
+            color_result[i] = GREEN
             l_count[guess[i]] -= 1
 
     for i in range(5):
-        if result[i] != GREEN:
+        if color_result[i] != GREEN:
             if guess[i] in word and l_count[guess[i]] > 0:
-                result[i] = YELLOW
+                color_result[i] = YELLOW
                 l_count[guess[i]] -= 1
             else:
-                result[i] = GRAY
+                color_result[i] = GRAY
 
-    return result, alph
+    return color_result, alph
 
+def print_guess(result, guess):
+    display_result = ""
+
+    for i in range(5):
+        display_result += f"{result[i]}{guess[i].upper()}{RESET} "
+
+    print(display_result)
 def letter_shift(word, alph):
     og = "abcdefghijklmnopqrstuvwxyz"
     alph[0] = ""
@@ -51,7 +58,6 @@ def letter_shift(word, alph):
     return alph
 
 def lie_check(alph):
-
     # edge case for all 5 letters found.
     # note. this gives the hint of a double letter maybe
     if len(alph[0]) == 0:
@@ -80,37 +86,31 @@ def trust_update(alph, guess):
         # y = % to gain, x = current trust %
         # gain at most 12.5% (unless modifier), slowly decrease gain
         diff = 100 / 4 * (1 - ((alph[2] * alph[2] * alph[5]) / 20000)) - (100 / 8)
-        print(diff)
         alph[2] = int(alph[2] + diff)
         print("You didn't trust the bot. New chance of truth: ", alph[2], "%")
 
     return alph
 
 def gameplay(word, alph):
-
     # bot gives a letter
     alph = lie_check(alph)
 
+    # run the guess
     while True:
-        guess = input()
+        guess = input().lower()
 
         if len(guess) == 5:
             break
         print("(not 5 letters, try again)\n")
 
-    result = [""] * 5
-
-    result, alph = check(guess, word, alph)
-
-    display_result = ""
-
-    for i in range(5):
-        display_result += f"{result[i]}{guess[i].upper()}{RESET} "
-
-    print(display_result)
+    # color code, display, update trust, check win
+    color_result, alph = check(guess, word, alph)
+    print_guess(color_result, guess)
     alph = trust_update(alph, guess)
 
-    return result, alph
+    win = True if guess == word else False
+
+    return win, alph
 
 def main():
     print("-----------------------------------------------------------\n")
@@ -121,24 +121,46 @@ def main():
     print("Goal: Survive 10 rounds\n")
 
     while True:
+        print("-----------------------------------------------------------\n")
         # start 10 rounds
+
+        print("Enter q to quit. Enter anything else to begin")
+        menu = input().lower()
+        if menu == "q":
+            break
+
         print("Game Start!")
-        print("Enter your initial guess\n")
 
         # correct letters, unused letters, liar_bar, lie_scaling, given_guess, recovery_buff
-        alph = ["", "", 100, 0.9, "", 1]
+        # add recovery buff in shop
+        alph = ["", "", 100, 0.75, "", 1]
 
-        for rounds in range(10):
+        rounds = 1
+        max_rounds = 11
+        while rounds < max_rounds:
+            print("\nRound: ", rounds)
+            print("Enter your initial guess\n")
+
             word = pick_word()
 
-            # alhpabet without correct letters
+            # alphabet without correct letters
             alph = letter_shift(word, alph)
 
             # make powerup to increase / lose in shop
             max_turns = 5
             # make turns useful (points back when word done)
             for turns in range(max_turns):
-                result, alph = gameplay(word, alph)
+                win, alph = gameplay(word, alph)
+
+                if win:
+                    rounds += 1
+                    break
+
+            if not win:
+                print("\nOut of Tries! Game Over!\n")
+                break
+
+    print("\nThank you for PLaying!")
 
 if __name__ == "__main__":
     main()
