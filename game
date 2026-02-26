@@ -55,7 +55,9 @@ def lie_check(alph):
     # edge case for all 5 letters found.
     # note. this gives the hint of a double letter maybe
     if len(alph[0]) == 0:
-        return "uhhhhh...", alph
+        alph[4] = ""
+        print("I'm thinking... uhhhhh...", alph[4])
+        return alph
 
     # guaranteed truth at the start
     lie_roll = random.randint(0, 99)
@@ -66,6 +68,7 @@ def lie_check(alph):
         alph[4] = alph[0][random.randint(0, len(alph[0]) - 1)]
 
     print("Chance of Truth: ", alph[2], "%")
+    print("I'm thinking... ", alph[4])
     return alph
 
 def trust_update(alph, guess):
@@ -74,6 +77,7 @@ def trust_update(alph, guess):
         print("You Trusted the bot. New chance of truth: ", alph[2], "%")
     else:
         # y = 1/4 ( 1- (x^2)/2 ) - 1/8
+        # y = % to gain, x = current trust %
         # gain at most 12.5% (unless modifier), slowly decrease gain
         diff = 100 / 4 * (1 - ((alph[2] * alph[2] * alph[5]) / 20000)) - (100 / 8)
         print(diff)
@@ -82,11 +86,10 @@ def trust_update(alph, guess):
 
     return alph
 
-def gameplay(turns, word, alph):
+def gameplay(word, alph):
 
     # bot gives a letter
     alph = lie_check(alph)
-    print("I'm thinking... ", alph[4])
 
     while True:
         guess = input()
@@ -133,8 +136,9 @@ def main():
 
             # make powerup to increase / lose in shop
             max_turns = 5
+            # make turns useful (points back when word done)
             for turns in range(max_turns):
-                result, alph = gameplay(turns, word, alph)
+                result, alph = gameplay(word, alph)
 
 if __name__ == "__main__":
     main()
