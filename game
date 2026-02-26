@@ -1,0 +1,113 @@
+import random
+
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+GRAY = '\033[90m'
+RESET = '\033[0m'
+
+def pick_word():
+    word = "beach"
+
+    #word list call will happen here
+
+    return word
+
+def check(guess, word, alph):
+    result = [""] * 5
+    l_count = {}
+
+    for l in word:
+        l_count[l] = l_count.get(l, 0) + 1
+
+    for i in range(5):
+        alph = alph.replace(guess[i], "")
+        if guess[i] == word[i]:
+            result[i] = GREEN
+            l_count[guess[i]] -= 1
+
+    for i in range(5):
+        if result[i] != GREEN:
+            if guess[i] in word and l_count[guess[i]] > 0:
+                result[i] = YELLOW
+                l_count[guess[i]] -= 1
+            else:
+                result[i] = GRAY
+
+    return result, alph
+
+def letter_shift(word):
+    alph = ""
+    for i in range(5):
+        alph += word[i]
+
+    og = "abcdefghijklmnopqrstuvwxyz"
+    for i in og:
+        if i not in word:
+            alph += i
+
+    return alph
+
+def lie_check(liar_bar, alph):
+    #have alg decide to lie or not
+    #if liar_bar > 2:
+
+    # edge case for all 5 letters found
+    # (just force a lie. try leftmost letter on list)
+
+    letter = alph[random.randint(0, len(alph) - 1)]
+    return letter, alph
+
+def gameplay(liar_bar, turns, word, alph):
+    if turns % 2 == 0:
+        letter, alph = lie_check(liar_bar, alph)
+        print("I'm thinking... ", letter)
+
+    while True:
+        guess = input().lower()
+
+        if guess == "-h":
+            # prob just use duplciate string that's sorted, but its so short doesn't matter
+            alphabet = sorted(alph)
+            for letter in alphabet:
+                print(letter, " ", end="")
+            continue
+
+        if len(guess) == 5:
+            break
+        print("(not 5 letters, try again)\n")
+
+    result = [""] * 5
+
+    result, alph = check(guess, word, alph)
+
+    display_result = ""
+
+    for i in range(5):
+        display_result += f"{result[i]}{guess[i].upper()}{RESET} "
+
+    print(display_result)
+
+    return result, alph
+
+def main():
+    print("-----------------------------------------------------------\n")
+    print("Rules: You have 5 guesses.")
+    print("A bot will suggest words every other turn.")
+    print("Depending on your level of trust, the bot may or may not lie.")
+    print("Enter a 5 letter word. Enter '-h' for the current wordlist\n")
+
+    print("Enter your initial guess\n")
+    liar_bar = -3
+
+    # new game, reset and allow 5 guesses
+    while True:
+        word = pick_word()
+
+        # alhpabet, all the correct letters shifted to the front
+        alph = letter_shift(word)
+
+        for turns in range(5):
+            result, alph = gameplay(liar_bar, turns, word, alph)
+
+if __name__ == "__main__":
+    main()
