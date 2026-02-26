@@ -5,3 +5,11 @@ Rules:
 2. A bot will suggest words every other turn.
 3. Depending on your level of trust, the bot may or may not lie.
 4. Enter a 5 letter word. Enter '-h' for the current wordlist
+
+How to play:
+Simple python file. Make sure Python is installed on PC
+Open command line
+Download the game, and cd to the directory you placed it in.
+Run 'py game.py' in command line
+
+Alternatively you can run the python file 'game.py' however else.
