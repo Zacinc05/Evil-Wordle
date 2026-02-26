@@ -20,7 +20,8 @@ def check(guess, word, alph):
         l_count[l] = l_count.get(l, 0) + 1
 
     for i in range(5):
-        alph = alph.replace(guess[i], "")
+        alph[0] = alph[0].replace(guess[i], "")
+        alph[1] = alph[1].replace(guess[i], "")
         if guess[i] == word[i]:
             result[i] = GREEN
             l_count[guess[i]] -= 1
@@ -35,42 +36,60 @@ def check(guess, word, alph):
 
     return result, alph
 
-def letter_shift(word):
-    alph = ""
-    for i in range(5):
-        alph += word[i]
-
+def letter_shift(word, alph):
     og = "abcdefghijklmnopqrstuvwxyz"
+    alph[0] = ""
+    alph[1] = ""
+
+    for i in range(5):
+        alph[0] += word[i]
+
     for i in og:
-        if i not in word:
-            alph += i
+        if i not in alph[0]:
+            alph[1] += i
 
     return alph
 
-def lie_check(liar_bar, alph):
-    #have alg decide to lie or not
-    #if liar_bar > 2:
+def lie_check(alph):
 
-    # edge case for all 5 letters found
-    # (just force a lie. try leftmost letter on list)
+    # edge case for all 5 letters found.
+    # note. this gives the hint of a double letter maybe
+    if len(alph[0]) == 0:
+        return "uhhhhh...", alph
 
-    letter = alph[random.randint(0, len(alph) - 1)]
-    return letter, alph
+    # guaranteed truth at the start
+    lie_roll = random.randint(0, 99)
+    letter = ""
+    if alph[2] < lie_roll: #lie
+        alph[4] = alph[1][random.randint(0, len(alph[1]) - 1)]
+    else: #truth
+        alph[4] = alph[0][random.randint(0, len(alph[0]) - 1)]
 
-def gameplay(liar_bar, turns, word, alph):
-    if turns % 2 == 0:
-        letter, alph = lie_check(liar_bar, alph)
-        print("I'm thinking... ", letter)
+    print("Chance of Truth: ", alph[2], "%")
+    return alph
+
+def trust_update(alph, guess):
+    if alph[4] in guess:
+        alph[2] = int(alph[2] * alph[3])
+        print("You Trusted the bot. New chance of truth: ", alph[2], "%")
+    else:
+        # y = 1/4 ( 1- (x^2)/2 ) - 1/8
+        # gain at most 12.5% (unless modifier), slowly decrease gain
+        diff = 100 / 4 * (1 - ((alph[2] * alph[2] * alph[5]) / 20000)) - (100 / 8)
+        print(diff)
+        alph[2] = int(alph[2] + diff)
+        print("You didn't trust the bot. New chance of truth: ", alph[2], "%")
+
+    return alph
+
+def gameplay(turns, word, alph):
+
+    # bot gives a letter
+    alph = lie_check(alph)
+    print("I'm thinking... ", alph[4])
 
     while True:
-        guess = input().lower()
-
-        if guess == "-h":
-            # prob just use duplciate string that's sorted, but its so short doesn't matter
-            alphabet = sorted(alph)
-            for letter in alphabet:
-                print(letter, " ", end="")
-            continue
+        guess = input()
 
         if len(guess) == 5:
             break
@@ -86,6 +105,7 @@ def gameplay(liar_bar, turns, word, alph):
         display_result += f"{result[i]}{guess[i].upper()}{RESET} "
 
     print(display_result)
+    alph = trust_update(alph, guess)
 
     return result, alph
 
@@ -93,21 +113,28 @@ def main():
     print("-----------------------------------------------------------\n")
     print("Rules: You have 5 guesses.")
     print("A bot will suggest words every other turn.")
-    print("Depending on your level of trust, the bot may or may not lie.")
-    print("Enter a 5 letter word. Enter '-h' for the current wordlist\n")
+    print("Depending on your level of trust, the bot may begin to lie more.")
+    print("Enter a 5 letter word.")
+    print("Goal: Survive 10 rounds\n")
 
-    print("Enter your initial guess\n")
-    liar_bar = -3
-
-    # new game, reset and allow 5 guesses
     while True:
-        word = pick_word()
+        # start 10 rounds
+        print("Game Start!")
+        print("Enter your initial guess\n")
 
-        # alhpabet, all the correct letters shifted to the front
-        alph = letter_shift(word)
+        # correct letters, unused letters, liar_bar, lie_scaling, given_guess, recovery_buff
+        alph = ["", "", 100, 0.9, "", 1]
 
-        for turns in range(5):
-            result, alph = gameplay(liar_bar, turns, word, alph)
+        for rounds in range(10):
+            word = pick_word()
+
+            # alhpabet without correct letters
+            alph = letter_shift(word, alph)
+
+            # make powerup to increase / lose in shop
+            max_turns = 5
+            for turns in range(max_turns):
+                result, alph = gameplay(turns, word, alph)
 
 if __name__ == "__main__":
     main()
