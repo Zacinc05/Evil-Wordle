@@ -109,7 +109,7 @@ def shop(alph, items, max_turns):
         opt = ["1. Increase truth recovery by 5% each time the hint isn't used (permenant)",
                "2. Boost truth chance by 20% (can exceed 100%, will fall quickly)",
                "3. Increase max guesses by 1 (permenant)",
-               "4. Buy a hint reveal (one time use)"]
+               "----4. Buy a hint reveal (one time use) NOT IMPLEMENTED"]
 
         for i in range(len(opt)):
             print(f"{opt[i]:<80} Price: ${items[1][i]}")
@@ -204,7 +204,7 @@ def main():
         alph = ["", "", 100, 0.75, "", 0]
 
         # cash, prices, price increases, hint_reveal
-        items = [0, [4,2,6,1], [2,1,3,1], 0]
+        items = [0, [4,1,6,1], [2,1,3,1], 0]
 
         max_turns = 5
         rounds = 1
@@ -231,7 +231,7 @@ def main():
 
                 if win:
                     rounds += 1
-                    items[0] += (max_turns - turn)
+                    items[0] += (max_turns - turn + 1)
                     alph, items, max_turns = shop(alph, items, max_turns)
                     break
 
