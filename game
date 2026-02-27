@@ -6,11 +6,8 @@ GRAY = '\033[90m'
 RESET = '\033[0m'
 
 def pick_word():
-    word = "beach"
-
-    #word list call will happen here
-
-    return word
+    #word = "beach"
+    return random.choice(open('word_list').readlines()).strip()
 
 def check(guess, word, alph):
     color_result = [""] * 5
@@ -42,7 +39,8 @@ def print_guess(result, guess):
     for i in range(5):
         display_result += f"{result[i]}{guess[i].upper()}{RESET} "
 
-    print(display_result)
+    #print(display_result)
+    return display_result
 def letter_shift(word, alph):
     og = "abcdefghijklmnopqrstuvwxyz"
     alph[0] = ""
@@ -97,17 +95,22 @@ def shop(alph, cash, max_turns, price):
     print("\n" + " -" * 19)
     input()
 
-    print("\n" + "- " * 19)
+    print("- " * 19)
     print("Welcome to the Shop")
     print("Each round, you gain $1 per unused guess.")
-    print("\n" + " -" * 19)
+    print(" -" * 19)
 
     while True:
+        print("Current stats:\n"
+              "-additional ignore boost: +", alph[5], "%")
+        print("Current chance of truthful hint: ", alph[2])
+        print("-guesses per round: ", max_turns, "\n")
+
         opt = ["1. Increase truth recovery by 5% each time the hint isn't used (permenant)",
                "2. Boost truth chance by 20% (can exceed 100%, will fall quickly)",
                "3. Increase max guesses by 1 (permenant)"]
 
-        for i in range(3):
+        for i in range(len(opt)):
             print(f"{opt[i]:<80} Price: ${price[i]}")
 
         print("Press q to exit shop and begin the next round.\n")
@@ -117,24 +120,36 @@ def shop(alph, cash, max_turns, price):
         if buy == "q":
             break
 
-        # add integer check range 1-3
-        # add budget check
-        option = int(buy)
-        cash -= price[option - 1]
-        price[option - 1] += 2
+        if not buy.isdigit() or not 1 <= int(buy) <= 3:
+            print("Invalid option. Please try again.")
+            continue
 
+        option = int(buy)
         match option:
 
             case 1:
+                if price[0] > cash:
+                    print("Cannot afford. Please try again.")
+                    continue
                 alph[5] += 5
             case 2:
+                if price[1] > cash:
+                    print("Cannot afford. Please try again.")
+                    continue
                 alph[2] += 20
             case 3:
+                if price[2] > cash:
+                    print("Cannot afford. Please try again.")
+                    continue
                 max_turns += 1
+
+        cash -= price[option - 1]
+        price[option - 1] += 2
+        print("Transaction Complete!\n")
 
     return alph, cash, max_turns, price
 
-def gameplay(word, alph):
+def gameplay(word, alph, round_box):
     # bot gives a letter
     alph = lie_check(alph)
 
@@ -148,12 +163,17 @@ def gameplay(word, alph):
 
     # color code, display, update trust, check win
     color_result, alph = check(guess, word, alph)
-    print_guess(color_result, guess)
+    display_string = print_guess(color_result, guess)
     alph = trust_update(alph, guess)
 
-    win = True if guess == word else False
+    round_box.append(display_string)
+    for r in round_box:
+        print(r)
 
-    return win, alph
+    win = True if guess.lower() == word else False
+    #print(word)
+
+    return win, alph, round_box
 
 def main():
     print("-----------------------------------------------------------\n")
@@ -192,8 +212,10 @@ def main():
             # sort alphabet by chosen word
             alph = letter_shift(word, alph)
 
+            round_box = []
+
             for turns in range(max_turns):
-                win, alph = gameplay(word, alph)
+                win, alph, round_box = gameplay(word, alph, round_box)
 
                 if win:
                     rounds += 1
