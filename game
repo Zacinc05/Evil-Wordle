@@ -6,8 +6,8 @@ GRAY = '\033[90m'
 RESET = '\033[0m'
 
 def pick_word():
-    #word = "beach"
-    return random.choice(open('word_list').readlines()).strip()
+    with open('word_list') as f:
+        return random.choice(f.readlines()).strip()
 
 def check(guess, word, alph):
     color_result = [""] * 5
@@ -89,7 +89,7 @@ def trust_update(alph, guess):
 
     return alph
 
-def shop(alph, cash, max_turns, price):
+def shop(alph, items, max_turns):
     print("\n" + "- " * 19, end="")
     print("\nYou got the word! Press enter to continue", end="")
     print("\n" + " -" * 19)
@@ -108,19 +108,20 @@ def shop(alph, cash, max_turns, price):
 
         opt = ["1. Increase truth recovery by 5% each time the hint isn't used (permenant)",
                "2. Boost truth chance by 20% (can exceed 100%, will fall quickly)",
-               "3. Increase max guesses by 1 (permenant)"]
+               "3. Increase max guesses by 1 (permenant)",
+               "4. Buy a hint reveal (one time use)"]
 
         for i in range(len(opt)):
-            print(f"{opt[i]:<80} Price: ${price[i]}")
+            print(f"{opt[i]:<80} Price: ${items[1][i]}")
 
         print("Press q to exit shop and begin the next round.\n")
-        print("- Current funds: $", cash)
+        print("- Current funds: $", items[0])
 
         buy = input()
         if buy == "q":
             break
 
-        if not buy.isdigit() or not 1 <= int(buy) <= 3:
+        if not buy.isdigit() or not 1 <= int(buy) <= 4:
             print("Invalid option. Please try again.")
             continue
 
@@ -128,28 +129,33 @@ def shop(alph, cash, max_turns, price):
         match option:
 
             case 1:
-                if price[0] > cash:
+                if items[1][0] > items[0]:
                     print("Cannot afford. Please try again.")
                     continue
                 alph[5] += 5
             case 2:
-                if price[1] > cash:
+                if items[1][1] > items[0]:
                     print("Cannot afford. Please try again.")
                     continue
                 alph[2] += 20
             case 3:
-                if price[2] > cash:
+                if items[1][2] > items[0]:
                     print("Cannot afford. Please try again.")
                     continue
                 max_turns += 1
+            case 4:
+                if items[1][3] > items[0]:
+                    print("Cannot afford. Please try again.")
+                    continue
+                items[3] += 1
 
-        cash -= price[option - 1]
-        price[option - 1] += 2
+        items[0] -= items[1][option - 1]
+        items[1][option - 1] += items[2][option - 1]
         print("Transaction Complete!\n")
 
-    return alph, cash, max_turns, price
+    return alph, items, max_turns
 
-def gameplay(word, alph, round_box):
+def gameplay(word, alph, round_box, turn):
     # bot gives a letter
     alph = lie_check(alph)
 
@@ -161,17 +167,19 @@ def gameplay(word, alph, round_box):
             break
         print("(not 5 letters, try again)\n")
 
-    # color code, display, update trust, check win
     color_result, alph = check(guess, word, alph)
     display_string = print_guess(color_result, guess)
     alph = trust_update(alph, guess)
 
-    round_box.append(display_string)
+    round_box[turn] = display_string
     for r in round_box:
-        print(r)
+        print(f"{r}\t- - - - -")
+
+
+        #print(word_display[i])
+        #display_result += f"{result[i]}{guess[i].upper()}{RESET}
 
     win = True if guess.lower() == word else False
-    #print(word)
 
     return win, alph, round_box
 
@@ -185,8 +193,6 @@ def main():
 
     while True:
         print("-----------------------------------------------------------\n")
-        # start 10 rounds
-
         print("Enter q to quit. Enter anything else to begin")
         menu = input().lower()
         if menu == "q":
@@ -195,32 +201,38 @@ def main():
         print("Game Start!")
 
         # correct letters, unused letters, liar_bar, lie_scaling, given_guess, recovery_buff
-        # add recovery buff in shop
         alph = ["", "", 100, 0.75, "", 0]
-        cash = 0
+
+        # cash, prices, price increases, hint_reveal
+        items = [0, [4,2,6,1], [2,1,3,1], 0]
 
         max_turns = 5
         rounds = 1
         max_rounds = 11
-        price = [4, 2, 6]
+
         while rounds < max_rounds:
             print("\nRound: ", rounds)
             print("Enter your initial guess\n")
 
             word = pick_word()
+            #print(word)
 
-            # sort alphabet by chosen word
             alph = letter_shift(word, alph)
 
             round_box = []
+            for loop in range(max_turns):
+                round_box.append("- - - - -")
 
-            for turns in range(max_turns):
-                win, alph, round_box = gameplay(word, alph, round_box)
+            win = False
+            turn = 0
+            while turn < max_turns:
+                win, alph, round_box = gameplay(word, alph, round_box, turn)
+                turn += 1
 
                 if win:
                     rounds += 1
-                    cash += (max_turns - turns)
-                    alph, cash, max_turns, price = shop(alph, cash, max_turns, price)
+                    items[0] += (max_turns - turn)
+                    alph, items, max_turns = shop(alph, items, max_turns)
                     break
 
             if not win:
