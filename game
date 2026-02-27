@@ -1,3 +1,4 @@
+import os
 import random
 
 GREEN = '\033[92m'
@@ -6,7 +7,10 @@ GRAY = '\033[90m'
 RESET = '\033[0m'
 
 def pick_word():
-    with open('word_list') as f:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, 'word_list.txt')
+
+    with open('file_path') as f:
         return random.choice(f.readlines()).strip()
 
 def check(guess, word, alph):
@@ -103,7 +107,7 @@ def shop(alph, items, max_turns):
     while True:
         print("Current stats:\n"
               "-additional ignore boost: +", alph[5], "%")
-        print("Current chance of truthful hint: ", alph[2])
+        print("-current chance of truthful hint: ", alph[2])
         print("-guesses per round: ", max_turns, "\n")
 
         opt = ["1. Increase truth recovery by 5% each time the hint isn't used (permenant)",
