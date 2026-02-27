@@ -85,11 +85,55 @@ def trust_update(alph, guess):
         # y = 1/4 ( 1- (x^2)/2 ) - 1/8
         # y = % to gain, x = current trust %
         # gain at most 12.5% (unless modifier), slowly decrease gain
-        diff = 100 / 4 * (1 - ((alph[2] * alph[2] * alph[5]) / 20000)) - (100 / 8)
+        diff = 100 / 4 * (1 - ((alph[2] * alph[2]) / 20000)) - 12.5 + alph[5]
         alph[2] = int(alph[2] + diff)
         print("You didn't trust the bot. New chance of truth: ", alph[2], "%")
 
     return alph
+
+def shop(alph, cash, max_turns):
+    print("\n" + "- " * 19, end="")
+    print("\nYou got the word! Press enter to continue", end="")
+    print("\n" + " -" * 19)
+    input()
+
+    print("\n" + "- " * 19)
+    print("Welcome to the Shop")
+    print("Each round, you gain $1 per unused guess.")
+    print("\n" + " -" * 19)
+
+    opt = ["1. Increase truth recovery by 5% each time the hint isn't used (permenant)",
+           "2. Boost truth chance by 20% (can exceed 100%, will fall quickly)",
+           "3. Increase max guesses by 1 (permenant)"]
+    price = [4, 2, 6]
+
+    for i in range(3):
+        print(f"{opt[i]:<80} Price: ${price[i]}")
+
+    print("Press q to exit shop and begin the next round.\n")
+    print("- Current funds: $", cash)
+
+    while True:
+        buy = input()
+        if buy == "q":
+            break
+
+        # add integer check range 1-3
+        # add budget check
+
+        cash -= price[buy - 1]
+        price[buy - 1] += 2
+
+        match buy:
+
+            case "1":
+                alph[5] += 0.05
+            case "2":
+                alph[2] += 20
+            case "3":
+                max_turns += 1
+
+    return alph, cash, max_turns
 
 def gameplay(word, alph):
     # bot gives a letter
@@ -134,7 +178,9 @@ def main():
         # correct letters, unused letters, liar_bar, lie_scaling, given_guess, recovery_buff
         # add recovery buff in shop
         alph = ["", "", 100, 0.75, "", 1]
+        cash = 0
 
+        max_turns = 5
         rounds = 1
         max_rounds = 11
         while rounds < max_rounds:
@@ -143,17 +189,16 @@ def main():
 
             word = pick_word()
 
-            # alphabet without correct letters
+            # sort alphabet by chosen word
             alph = letter_shift(word, alph)
 
-            # make powerup to increase / lose in shop
-            max_turns = 5
-            # make turns useful (points back when word done)
             for turns in range(max_turns):
                 win, alph = gameplay(word, alph)
 
                 if win:
                     rounds += 1
+                    cash += (max_turns - turns)
+                    alph, cash, max_turns = shop(alph, cash, max_turns)
                     break
 
             if not win:
