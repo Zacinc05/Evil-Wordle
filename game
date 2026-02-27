@@ -10,7 +10,7 @@ def pick_word():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, 'word_list.txt')
 
-    with open('file_path') as f:
+    with open(file_path) as f:
         return random.choice(f.readlines()).strip()
 
 def check(guess, word, alph):
