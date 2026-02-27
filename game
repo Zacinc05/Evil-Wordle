@@ -85,9 +85,9 @@ def trust_update(alph, guess):
         print("You Trusted the bot. New chance of truth: ", alph[2], "%")
     else:
         # y = 1/4 ( 1- (x^2)/2 ) - 1/8
-        # y = % to gain, x = current trust %
-        # gain at most 12.5% (unless modifier), slowly decrease gain
-        diff = (100 / 4 * (1 - ((alph[2] * alph[2]) / 20000)) - 12.5) + alph[5]
+        #diff = (100 / 4 * (1 - ((alph[2] * alph[2]) / 20000)) - 12.5) + alph[5]
+
+        diff = 5 + alph[5]
         alph[2] = int(alph[2] + diff)
         print("You didn't trust the bot. New chance of truth: ", alph[2], "%")
 
@@ -105,15 +105,17 @@ def shop(alph, items, max_turns):
     print(" -" * 19)
 
     while True:
-        print("Current stats:\n"
-              "-additional ignore boost: +", alph[5], "%")
+        print("Current stats:")
+        print("-ignore hint boost:", (5 + alph[5]), "%")
         print("-current chance of truthful hint: ", alph[2])
+        print("-trust loss after using hint: ", (1-alph[3]), "%")
         print("-guesses per round: ", max_turns, "\n")
 
         opt = ["1. Increase truth recovery by 5% each time the hint isn't used (permenant)",
                "2. Boost truth chance by 20% (can exceed 100%, will fall quickly)",
                "3. Increase max guesses by 1 (permenant)",
-               "----4. Buy a hint reveal (one time use) NOT IMPLEMENTED"]
+               "----4. Buy a hint reveal (one time use) NOT IMPLEMENTED",
+               "5. Trusting the hint loses 5% less"]
 
         for i in range(len(opt)):
             print(f"{opt[i]:<80} Price: ${items[1][i]}")
@@ -125,7 +127,7 @@ def shop(alph, items, max_turns):
         if buy == "q":
             break
 
-        if not buy.isdigit() or not 1 <= int(buy) <= 4:
+        if not buy.isdigit() or not 1 <= int(buy) <= 5:
             print("Invalid option. Please try again.")
             continue
 
@@ -152,6 +154,11 @@ def shop(alph, items, max_turns):
                     print("Cannot afford. Please try again.")
                     continue
                 items[3] += 1
+            case 5:
+                if items[1][4] > items[0]:
+                    print("Cannot afford. Please try again.")
+                    continue
+                alph[3] += 0.05
 
         items[0] -= items[1][option - 1]
         items[1][option - 1] += items[2][option - 1]
@@ -178,7 +185,6 @@ def gameplay(word, alph, round_box, turn):
     round_box[turn] = display_string
     for r in round_box:
         print(f"{r}\t- - - - -")
-
 
         #print(word_display[i])
         #display_result += f"{result[i]}{guess[i].upper()}{RESET}
@@ -208,7 +214,7 @@ def main():
         alph = ["", "", 100, 0.75, "", 0]
 
         # cash, prices, price increases, hint_reveal
-        items = [0, [4,1,6,1], [2,1,3,1], 0]
+        items = [0, [4,1,6,1,3], [2,1,3,1,2], 0]
 
         max_turns = 5
         rounds = 1
