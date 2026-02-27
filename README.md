@@ -9,7 +9,8 @@ After each Wordle, a shop will offer upgrades
 Goal: Survive 10 rounds
 
 How to play:
-Simple python file. Make sure Python is installed on PC
+Simple python file. Make sure Python is installed on PC.
+Word list should be in the same directory as the game file.
 Open command line
 Download the game, and cd to the directory you placed it in.
 Run 'py game.py' in command line
