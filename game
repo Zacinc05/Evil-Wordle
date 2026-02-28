@@ -63,37 +63,51 @@ def letter_shift(word, alph):
 
     return alph
 
+def print_robot(try_message, truth):
+    print("     *")
+    print(" ____|____")
+    print("|   _ _   |  ", end="")
+    print(f"WordBot: {try_message}")
+    print("|   | |   |")
+    print(f"| {truth} |")
+    print("|_________|")
 def lie_check(alph):
     # edge case for all 5 letters found.
     # note. this gives the hint of a double letter maybe
     if len(alph[0]) == 0:
         alph[4] = ""
-        print("I'm thinking... uhhhhh...", alph[4])
+
+        try_message = f"I'm thinking... uhhhhh... (seems they have every letter)"
+        truth = r"\/\/\/."
+
+        print_robot(try_message, truth)
+
         return alph
 
     # guaranteed truth at the start
     lie_roll = random.randint(0, 99)
-    letter = ""
     if alph[2] < lie_roll: #lie
         alph[4] = alph[1][random.randint(0, len(alph[1]) - 1)]
     else: #truth
         alph[4] = alph[0][random.randint(0, len(alph[0]) - 1)]
 
-    print("Chance of Truth: ", alph[2], "%")
-    print("I'm thinking... ", alph[4])
+    try_message = f"I'm thinking... {alph[4]}"
+    truth = r"\_____/"
+    print_robot(try_message, truth)
+
     return alph
 
 def trust_update(alph, guess):
     if alph[4] in guess:
         alph[2] = int(alph[2] * alph[3])
-        print("You Trusted the bot. New chance of truth: ", alph[2], "%")
+        print("You Trusted the bot. New chance of truth: ", alph[2], "%\n")
     else:
         # y = 1/4 ( 1- (x^2)/2 ) - 1/8
         #diff = (100 / 4 * (1 - ((alph[2] * alph[2]) / 20000)) - 12.5) + alph[5]
 
         diff = 5 + alph[5]
         alph[2] = int(alph[2] + diff)
-        print("You didn't trust the bot. New chance of truth: ", alph[2], "%")
+        print("You didn't trust the bot. New chance of truth: ", alph[2], "%\n")
 
     return alph
 
@@ -177,6 +191,7 @@ def gameplay(word, alph, round_box, turn, color_alphabet):
     # run the guess
     while True:
         guess = input().lower()
+        print("\n" * 20)
 
         if len(guess) == 5:
             break
@@ -188,10 +203,7 @@ def gameplay(word, alph, round_box, turn, color_alphabet):
 
     round_box[turn] = display_string
     for i in range(len(round_box)):
-        print(f"{round_box[i]}\t\t\t{color_alphabet[i]}\t\t")
-
-        #print(word_display[i])
-        #display_result += f"{result[i]}{guess[i].upper()}{RESET}
+        print(f"{round_box[i]}\t\t{color_alphabet[i]}\t\t")
 
     win = True if guess.lower() == word else False
 
@@ -230,7 +242,7 @@ def main():
             print("Enter your initial guess\n")
 
             word = pick_word()
-            #print(word)
+            print(word)
 
             alph = letter_shift(word, alph)
 
