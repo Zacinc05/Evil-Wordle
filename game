@@ -235,11 +235,6 @@ def main():
 
         # correct letters, unused letters, liar_bar, lie_scaling, given_guess, recovery_buff
         alph = ["", "", 100, 0.75, "", 0]
-        color_alphabet = ["a b c d e f",
-                          "g h i j k l",
-                          "m n o p q r",
-                          "s t u v w x",
-                          "    y z    "]
 
         # cash, prices, price increases, hint_reveal
         items = [0, [4,1,6,1,3], [2,1,3,1,2], 0]
@@ -260,6 +255,12 @@ def main():
             round_box = []
             for loop in range(max_turns):
                 round_box.append("- - - - -")
+
+            color_alphabet = ["a b c d e f",
+                                "g h i j k l",
+                                "m n o p q r",
+                                "s t u v w x",
+                                "    y z    "]
 
             win = False
             turn = 0
