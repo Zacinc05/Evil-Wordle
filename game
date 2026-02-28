@@ -13,7 +13,7 @@ def pick_word():
     with open(file_path) as f:
         return random.choice(f.readlines()).strip()
 
-def check(guess, word, alph):
+def check(guess, word, alph, color_alphabet):
     color_result = [""] * 5
     l_count = {}
 
@@ -23,6 +23,10 @@ def check(guess, word, alph):
     for i in range(5):
         alph[0] = alph[0].replace(guess[i], "")
         alph[1] = alph[1].replace(guess[i], "")
+
+        for itr in range(len(color_alphabet)):
+            color_alphabet[itr] = color_alphabet[itr].replace(guess[i], "-")
+
         if guess[i] == word[i]:
             color_result[i] = GREEN
             l_count[guess[i]] -= 1
@@ -35,7 +39,7 @@ def check(guess, word, alph):
             else:
                 color_result[i] = GRAY
 
-    return color_result, alph
+    return color_result, alph, color_alphabet
 
 def print_guess(result, guess):
     display_result = ""
@@ -166,7 +170,7 @@ def shop(alph, items, max_turns):
 
     return alph, items, max_turns
 
-def gameplay(word, alph, round_box, turn):
+def gameplay(word, alph, round_box, turn, color_alphabet):
     # bot gives a letter
     alph = lie_check(alph)
 
@@ -178,20 +182,20 @@ def gameplay(word, alph, round_box, turn):
             break
         print("(not 5 letters, try again)\n")
 
-    color_result, alph = check(guess, word, alph)
+    color_result, alph, color_alphabet = check(guess, word, alph, color_alphabet)
     display_string = print_guess(color_result, guess)
     alph = trust_update(alph, guess)
 
     round_box[turn] = display_string
-    for r in round_box:
-        print(f"{r}\t- - - - -")
+    for i in range(len(round_box)):
+        print(f"{round_box[i]}\t\t\t{color_alphabet[i]}\t\t")
 
         #print(word_display[i])
         #display_result += f"{result[i]}{guess[i].upper()}{RESET}
 
     win = True if guess.lower() == word else False
 
-    return win, alph, round_box
+    return win, alph, round_box, color_alphabet
 
 def main():
     print("-----------------------------------------------------------\n")
@@ -212,6 +216,7 @@ def main():
 
         # correct letters, unused letters, liar_bar, lie_scaling, given_guess, recovery_buff
         alph = ["", "", 100, 0.75, "", 0]
+        color_alphabet = ["a b c d e f", "g h i j k l", "m n o p q r", "s t u v w x", "    y z    "]
 
         # cash, prices, price increases, hint_reveal
         items = [0, [4,1,6,1,3], [2,1,3,1,2], 0]
@@ -236,7 +241,7 @@ def main():
             win = False
             turn = 0
             while turn < max_turns:
-                win, alph, round_box = gameplay(word, alph, round_box, turn)
+                win, alph, round_box, color_alphabet = gameplay(word, alph, round_box, turn, color_alphabet)
                 turn += 1
 
                 if win:
