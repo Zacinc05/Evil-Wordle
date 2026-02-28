@@ -242,7 +242,7 @@ def main():
             print("Enter your initial guess\n")
 
             word = pick_word()
-            print(word)
+            #print(word)
 
             alph = letter_shift(word, alph)
 
