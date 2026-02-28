@@ -20,6 +20,8 @@ If you do not, make sure you install a version of python (this can be done many 
 ex) 'winget install Python.Python.3')
 
 Download the zip fiel and extract, and cd to the directory you placed it in.
-Run 'py game.py' in command line
+Run 'py game' in the command line.
 
-Alternatively you can run the python file 'game.py' however else.
+If you run into any issues, make sure a recent version of python is installed, and your command line is in the proper directory 
+(use the command 'dir' to make sure the game files are in the same directory)
+
