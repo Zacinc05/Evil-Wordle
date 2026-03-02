@@ -176,7 +176,9 @@ def shop(alph, items, max_turns):
             break
 
         if not buy.isdigit() or not 1 <= int(buy) <= 5:
-            print("Invalid option. Please try again.")
+            print("Invalid option. Press enter to continue.")
+            input()
+            print("\033c", end="")
             continue
 
         option = int(buy)
@@ -184,33 +186,45 @@ def shop(alph, items, max_turns):
 
             case 1:
                 if items[1][0] > items[0]:
-                    print("Cannot afford. Please try again.")
+                    print("Cannot afford. Please try again. Press enter to continue.")
+                    input()
+                    print("\033c", end="")
                     continue
                 alph[5] += 5
             case 2:
                 if items[1][1] > items[0]:
-                    print("Cannot afford. Please try again.")
+                    print("Cannot afford. Please try again. Press enter to continue.")
+                    input()
+                    print("\033c", end="")
                     continue
                 alph[2] += 20
             case 3:
                 if items[1][2] > items[0]:
-                    print("Cannot afford. Please try again.")
+                    print("Cannot afford. Please try again. Press enter to continue.")
+                    input()
+                    print("\033c", end="")
                     continue
                 max_turns += 1
             case 4:
                 if items[1][3] > items[0]:
-                    print("Cannot afford. Please try again.")
+                    print("Cannot afford. Please try again. Press enter to continue.")
+                    input()
+                    print("\033c", end="")
                     continue
                 items[3] += 1
             case 5:
                 if items[1][4] > items[0]:
-                    print("Cannot afford. Please try again.")
+                    print("Cannot afford. Please try again. Press enter to continue.")
+                    input()
+                    print("\033c", end="")
                     continue
                 alph[3] += 0.05
 
         items[0] -= items[1][option - 1]
         items[1][option - 1] += items[2][option - 1]
-        print("Transaction Complete!\n")
+        print("Transaction Complete! Press enter to continue.\n")
+        input()
+        print("\033c", end="")
 
     #print("\n" * 30)
     print("\033c", end="")
